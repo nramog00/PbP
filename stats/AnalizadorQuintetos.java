@@ -1,10 +1,12 @@
 package stats;
 
 import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 
 public class AnalizadorQuintetos {
 
-    /** Estructura para las estadísticas de cada quinteto */
+    /** Clase interna para almacenar estadísticas de un quinteto */
     public static class QuintetoStats {
         public int cuarto;
         public Set<String> jugadores = new HashSet<>();
@@ -27,67 +29,65 @@ public class AnalizadorQuintetos {
             return tiempoFin - tiempoInicio;
         }
 
-        /**
-         * Devuelve una clave única del quinteto: cuarto + nombres ordenados
-         */
         public String generarClave() {
-            java.util.List<String> lista = new java.util.ArrayList<String>(jugadores);
-            java.util.Collections.sort(lista);
-            StringBuilder sb = new StringBuilder();
-            sb.append(cuarto).append(" - ");
-            for (int i = 0; i < lista.size(); i++) {
-                sb.append(lista.get(i));
-                if (i < lista.size() - 1) sb.append(", ");
-            }
-            return sb.toString();
+            List<String> lista = new ArrayList<>(jugadores);
+            Collections.sort(lista);
+            return cuarto + " - " + String.join(", ", lista);
         }
     }
 
-    /**
-     * Analiza las acciones de un equipo y devuelve un mapa con estadísticas de cada quinteto
-     */
+    /** Analiza todas las acciones de un equipo y devuelve estadísticas de cada quinteto */
     public Map<String, QuintetoStats> analizarQuintetos(Equipo equipo) {
-        Accion[] acciones = equipo.getAcciones(); // Usamos el array directamente
+        Accion[] acciones = equipo.getAcciones();
         Map<String, QuintetoStats> resultado = new LinkedHashMap<>();
+        if (acciones == null || acciones.length == 0) return resultado;
 
         Set<String> quintetoActual = new HashSet<>();
         int cuartoActual = 1;
         double tiempoUltimoCambio = 0.0;
 
         for (Accion a : acciones) {
-            String accion = a.getAccion().toLowerCase();
-            double tiempoGlobal = a.getTiempoGlobal(); // Debe existir este campo en Accion
+            if (a == null || a.getJugador() == null || a.getAccion() == null) continue;
 
-            // Cambio de cuarto
-            if (accion.toLowerCase().contains("comienzo del cuarto")) {
+            String accion = a.getAccion().toLowerCase();
+            double tiempoGlobal = (a.getTiempoGlobal() != 0) ? a.getTiempoGlobal() : a.getTiempo().getTime() / 60000.0;
+
+            // --- Cambio de cuarto ---
+            if (accion.contains("comienzo del cuarto")) {
                 cuartoActual = a.getCuarto();
                 quintetoActual.clear();
                 tiempoUltimoCambio = tiempoGlobal;
                 continue;
             }
 
-            // Sustituciones
-            if (accion.toLowerCase().contains("sustitución")) {
-                if (accion.toLowerCase().contains("entra a pista")) quintetoActual.add(a.getJugador().getNombre());
-                else if (accion.toLowerCase().contains("sale de pista")) quintetoActual.remove(a.getJugador().getNombre());
+            // --- Sustituciones ---
+            if (accion.contains("sustitución")) {
+                String jugador = a.getJugador().getNombre();
+                if (accion.contains("entra")) quintetoActual.add(jugador);
+                else if (accion.contains("sale")) quintetoActual.remove(jugador);
 
+                // Guardar quinteto si ya hay 5 jugadores
                 if (quintetoActual.size() == 5) {
-                    QuintetoStats q = new QuintetoStats();
+                    String clave = generarClave(quintetoActual, cuartoActual);
+                    resultado.putIfAbsent(clave, new QuintetoStats());
+                    QuintetoStats q = resultado.get(clave);
                     q.cuarto = cuartoActual;
                     q.jugadores.addAll(quintetoActual);
                     q.tiempoInicio = tiempoUltimoCambio;
                     q.tiempoFin = tiempoGlobal;
-
-                    resultado.put(q.generarClave(), q);
                 }
 
                 tiempoUltimoCambio = tiempoGlobal;
                 continue;
             }
 
-            // Solo procesar si hay 5 jugadores
-            if (quintetoActual.size() != 5) continue;
+            // --- Inicializar quinteto automáticamente al comienzo ---
+            if (quintetoActual.size() < 5) {
+                quintetoActual.add(a.getJugador().getNombre());
+                if (quintetoActual.size() < 5) continue; // esperar a tener 5 jugadores
+            }
 
+            // --- Procesar quinteto existente ---
             String clave = generarClave(quintetoActual, cuartoActual);
             resultado.putIfAbsent(clave, new QuintetoStats());
             QuintetoStats q = resultado.get(clave);
@@ -95,19 +95,19 @@ public class AnalizadorQuintetos {
             q.jugadores.addAll(quintetoActual);
             if (q.tiempoInicio == 0) q.tiempoInicio = tiempoUltimoCambio;
 
-            // Estadísticas
-            if (accion.toLowerCase().contains("tiro de 2")) { 
+            // --- Estadísticas ---
+            if (accion.contains("tiro de 2")) { 
                 q.t2int++; 
-                if (accion.toLowerCase().contains("anotado")) { q.t2met++; q.puntos += 2; } 
-            } else if (accion.toLowerCase().contains("tiro de 3")) { 
+                if (accion.contains("anotado")) { q.t2met++; q.puntos += 2; } 
+            } else if (accion.contains("tiro de 3")) { 
                 q.t3int++; 
-                if (accion.toLowerCase().contains("anotado")) { q.t3met++; q.puntos += 3; } 
-            } else if (accion.toLowerCase().contains("tiro libre")) { 
+                if (accion.contains("anotado")) { q.t3met++; q.puntos += 3; } 
+            } else if (accion.contains("tiro libre")) { 
                 q.tlint++; 
-                if (accion.toLowerCase().contains("anotado")) { q.tlmet++; q.puntos += 1; } 
-            } else if (accion.toLowerCase().contains("rebote ofensivo")) q.rebOf++;
-            else if (accion.toLowerCase().contains("rebote defensivo")) q.rebDef++;
-            else if (accion.toLowerCase().contains("pérdida") || accion.contains("perdida")) q.perdidas++;
+                if (accion.contains("anotado")) { q.tlmet++; q.puntos += 1; } 
+            } else if (accion.contains("rebote ofensivo")) q.rebOf++;
+            else if (accion.contains("rebote defensivo")) q.rebDef++;
+            else if (accion.contains("pérdida") || accion.contains("perdida")) q.perdidas++;
 
             q.tiempoFin = tiempoGlobal;
             tiempoUltimoCambio = tiempoGlobal;
@@ -116,13 +116,10 @@ public class AnalizadorQuintetos {
         return resultado;
     }
 
-
-    /**
-     * Genera clave externa si no quieres usar el método dentro de QuintetoStats
-     */
+    /** Genera clave externa si no quieres usar el método dentro de QuintetoStats */
     private String generarClave(Set<String> jugadores, int cuarto) {
-        java.util.List<String> lista = new java.util.ArrayList<String>(jugadores);
-        java.util.Collections.sort(lista);
+        List<String> lista = new ArrayList<>(jugadores);
+        Collections.sort(lista);
         return cuarto + " - " + String.join(", ", lista);
     }
 }

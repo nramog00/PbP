@@ -3,6 +3,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import stats.AnalizadorQuintetos;
 import stats.Equipo;
+import stats.PruebaQuintetos;
 
 import java.io.*;
 import java.util.*;
@@ -185,6 +186,8 @@ public class App {
         }
 
         System.out.println("Hoja 'Quintetos' añadida correctamente al archivo Excel.");
+
+        PruebaQuintetos.imprimirQuintetos(stats);
     }
 
     /**
