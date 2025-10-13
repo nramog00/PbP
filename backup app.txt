@@ -1,0 +1,162 @@
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.*;
+import java.util.*;
+import java.util.regex.*;
+
+public class App {
+    private static final String INPUT_TXT_PATH = "C:/Users/Usuario/Documents/PbP/bfl.txt";
+    private static final String OUTPUT_XLSX_PATH = "C:/Users/Usuario/Documents/PbP/bfl.xlsx";
+    private static final double DURACION_CUARTO = 10.0;
+
+    public static void main(String[] args) throws Exception {
+        LeerExcel lector = new LeerExcel();
+        List<String[]> rows = new ArrayList<>();
+        Pattern pattern = Pattern.compile("\\(([^)]+)\\)\\s*([^:]+):?\\s*(.*)");
+
+        // Leer todas las líneas
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(INPUT_TXT_PATH))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                lines.add(line.trim());
+            }
+        }
+
+        // Invertir lista para procesar cronológicamente
+        Collections.reverse(lines);
+
+        // Variables de control
+        int currentQuarter = 1;
+        int scoreLocal = 0;
+        int scoreVisitante = 0;
+        String lastTime = "";
+
+        for (String line : lines) {
+            // Detectar inicio de cuarto
+            if (line.contains("Comienzo del Cuarto 1")) currentQuarter = 1;
+            else if (line.contains("Comienzo del Cuarto 2")) currentQuarter = 2;
+            else if (line.contains("Comienzo del Cuarto 3")) currentQuarter = 3;
+            else if (line.contains("Comienzo del Cuarto 4")) currentQuarter = 4;
+            else if (line.contains("Comienzo de la Prórroga")) currentQuarter = 5;
+
+            // Detectar marcador
+            else if (line.matches("\\d+\\s*-\\s*\\d+")) {
+                String[] scores = line.split("-");
+                scoreLocal = Integer.parseInt(scores[0].trim());
+                scoreVisitante = Integer.parseInt(scores[1].trim());
+            }
+
+            // Detectar línea de tiempo
+            else if (line.matches("\\d{2}:\\d{2}.*")) {
+                lastTime = line.split(" ")[0];
+            }
+
+            // Detectar acción
+            else if (line.startsWith("(")) {
+                Matcher m = pattern.matcher(line);
+                if (m.find()) {
+                    String equipo = m.group(1).trim();
+                    String jugador = m.group(2).trim();
+                    String accion = m.group(3).trim();
+
+                    double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
+
+                    rows.add(new String[]{
+                            equipo,
+                            jugador,
+                            accion,
+                            lastTime,
+                            String.valueOf(currentQuarter),
+                            toString(tiempoGlobal),
+                            String.valueOf(scoreLocal),
+                            String.valueOf(scoreVisitante)
+                    });
+                }
+            }
+        }
+
+        // Crear Excel
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("PlayByPlay");
+
+        // Encabezado
+        Row header = sheet.createRow(0);
+        header.createCell(0).setCellValue("Equipo");
+        header.createCell(1).setCellValue("Jugador");
+        header.createCell(2).setCellValue("Accion");
+        header.createCell(3).setCellValue("Tiempo");
+        header.createCell(4).setCellValue("Cuarto");
+        header.createCell(5).setCellValue("TiempoGlobal");
+        header.createCell(6).setCellValue("ID");
+        header.createCell(7).setCellValue("TanteoLocal");
+        header.createCell(8).setCellValue("TanteoVisitante");
+
+        CellStyle timeStyle = workbook.createCellStyle();
+        CreationHelper createHelper = workbook.getCreationHelper();
+        timeStyle.setDataFormat(createHelper.createDataFormat().getFormat("mm:ss"));
+        sheet.setDefaultColumnStyle(3, timeStyle);
+        
+        CellStyle totalTimeStyle = workbook.createCellStyle();
+        totalTimeStyle.setDataFormat(createHelper.createDataFormat().getFormat("mm:ss"));
+        sheet.setDefaultColumnStyle(5, totalTimeStyle);
+
+        // Escribir filas
+        for (int i = 0; i < rows.size(); i++) {
+            Row row = sheet.createRow(i + 1);
+            String[] data = rows.get(i);
+
+            for (int j = 0; j < data.length; j++) {
+                if (j == 5) {
+                    // TiempoGlobal → convertir a formato de hora Excel
+                    double tiempoMin = Double.parseDouble(data[j]); // minutos acumulados
+                    double excelTime = tiempoMin / (24 * 60.0);     // convertir a fracción de día
+                    Cell cell = row.createCell(j);
+                    cell.setCellValue(excelTime);
+                    cell.setCellStyle(totalTimeStyle);
+                } else if (j == 4 || j == 6 || j == 7 || j == 8) {
+                    // Cuarto, ID, Tanteos → numéricos
+                    try {
+                        double numericValue = Double.parseDouble(data[j]);
+                        row.createCell(j).setCellValue(numericValue);
+                    } catch (NumberFormatException e) {
+                        row.createCell(j).setCellValue(data[j]);
+                    }
+                } else {
+                    row.createCell(j).setCellValue(data[j]);
+                }
+            }
+
+            row.createCell(6).setCellValue(i);
+        }
+
+        // Guardar Excel
+        try (FileOutputStream fos = new FileOutputStream(OUTPUT_XLSX_PATH)) {
+            workbook.write(fos);
+        }
+        workbook.close();
+
+        System.out.println("Archivo Excel generado correctamente en orden cronológico y con tiempos ajustados.");
+
+        lector.leerArchivoExcel(OUTPUT_XLSX_PATH);
+        System.out.println("Archivo Excel leído y procesado correctamente.");
+    }
+
+    private static double convertirTiempoGlobal(String tiempo, int cuarto, double duracionCuarto) {
+        try {
+            String[] partes = tiempo.split(":");
+            int min = Integer.parseInt(partes[0]);
+            int sec = Integer.parseInt(partes[1]);
+            double minDec = min + sec / 60.0;
+            double tiempoDentroCuarto = duracionCuarto - minDec;
+            return (cuarto - 1) * duracionCuarto + tiempoDentroCuarto;
+        } catch (Exception e) {
+            return (cuarto - 1) * duracionCuarto;
+        }
+    }
+
+    private static String toString(double time) {
+        return String.format(Locale.US, "%.2f", time);
+    }
+}
