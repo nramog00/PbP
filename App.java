@@ -3,7 +3,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import stats.AnalizadorQuintetos;
 import stats.Equipo;
+import stats.Jug;
 import stats.PruebaQuintetos;
+import stats.Quinteto;
 
 import java.io.*;
 import java.util.*;
@@ -144,7 +146,7 @@ public class App {
             return;
         }
         AnalizadorQuintetos analizador = new AnalizadorQuintetos();
-        Map<String, AnalizadorQuintetos.QuintetoStats> stats = analizador.analizarQuintetos(miEquipo);
+        Map<String, Quinteto> stats = analizador.analizarQuintetos(miEquipo);
 
         try (FileInputStream fis = new FileInputStream(OUTPUT_XLSX_PATH);
              Workbook workbook2 = new XSSFWorkbook(fis)) {
@@ -162,22 +164,27 @@ public class App {
             }
 
             int rowNum = 1;
-            for (AnalizadorQuintetos.QuintetoStats q : stats.values()) {
+            for (Quinteto q : stats.values()) {
                 Row row = sheetQ.createRow(rowNum++);
                 int c = 0;
-                row.createCell(c++).setCellValue(q.cuarto);
-                row.createCell(c++).setCellValue(String.join(", ", q.jugadores));
+                row.createCell(c++).setCellValue(q.getCuarto());
+                row.createCell(c++).setCellValue(
+                    q.getJugadores().stream()
+                    .map(Jug::getNombre)
+                    .sorted() // opcional, para orden alfabético
+                    .collect(java.util.stream.Collectors.joining(", "))
+                );
                 row.createCell(c++).setCellValue(q.getMinutosJugados());
-                row.createCell(c++).setCellValue(q.puntos);
-                row.createCell(c++).setCellValue(q.t2met);
-                row.createCell(c++).setCellValue(q.t2int);
-                row.createCell(c++).setCellValue(q.t3met);
-                row.createCell(c++).setCellValue(q.t3int);
-                row.createCell(c++).setCellValue(q.tlmet);
-                row.createCell(c++).setCellValue(q.tlint);
-                row.createCell(c++).setCellValue(q.rebOf);
-                row.createCell(c++).setCellValue(q.rebDef);
-                row.createCell(c++).setCellValue(q.perdidas);
+                row.createCell(c++).setCellValue(q.getPuntos());
+                row.createCell(c++).setCellValue(q.getT2met());
+                row.createCell(c++).setCellValue(q.getT2int());
+                row.createCell(c++).setCellValue(q.getT3met());
+                row.createCell(c++).setCellValue(q.getT3int());
+                row.createCell(c++).setCellValue(q.getTlmet());
+                row.createCell(c++).setCellValue(q.getTlint());
+                row.createCell(c++).setCellValue(q.getRebOf());
+                row.createCell(c++).setCellValue(q.getRebDef());
+                row.createCell(c++).setCellValue(q.getPerdidas());
             }
 
             try (FileOutputStream fos = new FileOutputStream(OUTPUT_XLSX_PATH)) {
@@ -187,7 +194,7 @@ public class App {
 
         System.out.println("Hoja 'Quintetos' añadida correctamente al archivo Excel.");
 
-        PruebaQuintetos.imprimirQuintetos(stats);
+        //PruebaQuintetos.imprimirQuintetos(stats);
     }
 
     /**

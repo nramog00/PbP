@@ -32,6 +32,16 @@ public class Quinteto {
     public void setTiempoInicio(double t) { tiempoInicio = t; }
     public double getTiempoFin() { return tiempoFin; }
     public void setTiempoFin(double t) { tiempoFin = t; }
+    public int getPuntos() { return puntos; }
+    public int getT2met() { return t2met; }
+    public int getT2int() { return t2int; }
+    public int getT3met() { return t3met; }
+    public int getT3int() { return t3int; }
+    public int getTlmet() { return tlmet; }
+    public int getTlint() { return tlint; }
+    public int getRebOf() { return rebOf; }
+    public int getRebDef() { return rebDef; }
+    public int getPerdidas() { return perdidas; }
 
     // Método para sumar estadísticas
     public void agregarAccion(Accion a) {

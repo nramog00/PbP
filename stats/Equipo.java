@@ -1,6 +1,7 @@
 package stats;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Equipo {
@@ -19,14 +20,19 @@ public class Equipo {
     private Integer tirosLM;
 
     private List<Accion> acciones = new ArrayList<>();
+    private List<Jug> jugadores = new ArrayList<>();
 
     public Equipo() {
+        this.acciones = new ArrayList<>();
+        this.jugadores = new ArrayList<>();
     }
 
     public Equipo(Integer id, String nombre, String abreviatura) {
         this.id = id;
         this.nombre = nombre;
         this.abreviatura = abreviatura;
+        this.acciones = new ArrayList<>();
+        this.jugadores = new ArrayList<>();
     }
 
     public Integer getId() {
@@ -107,17 +113,46 @@ public class Equipo {
         this.tirosLM = tirosLM;
     }
 
-    public void agregarAccion(Accion accion) {
-        if (accion != null) {
-            acciones.add(accion);
+    // Getter: Retorna Accion[] (conversión de List a array)
+    public Accion[] getAcciones() {
+        return acciones != null && !acciones.isEmpty() ? 
+               acciones.toArray(new Accion[0]) : // Conversión explícita: List -> Accion[]
+               new Accion[0]; // Array vacío si null o vacío
+    }
+    // Setter: Acepta Accion[] y lo convierte a List
+    public void setAcciones(Accion[] accionesArray) {
+        if (accionesArray != null) {
+            this.acciones = new ArrayList<>(Arrays.asList(accionesArray)); // Conversión: Accion[] -> List
+        } else {
+            this.acciones = new ArrayList<>();
+        }
+    }
+    // Método para agregar una acción (usando List.add, sin array manual)
+    public void agregarAccion(Accion a) {
+        if (a != null) {
+            acciones.add(a); // Simple y eficiente con List
+        }
+    }
+    // Opcional: Getter para la lista interna (si lo necesitas en otros lugares)
+    public List<Accion> getListaAcciones() {
+        return new ArrayList<>(acciones); // Retorna copia para evitar modificaciones externas
+    }
+    // Setter alternativo para List (si lees directamente en lista)
+    public void setListaAcciones(List<Accion> lista) {
+        if (lista != null) {
+            this.acciones = new ArrayList<>(lista);
+        } else {
+            this.acciones = new ArrayList<>();
         }
     }
 
-    public Accion[] getAcciones() {
-        return acciones.toArray(new Accion[0]); // Devuelve un array de Accion
-    }
+    public List<Jug> getJugadores() { return new ArrayList<>(jugadores); }
 
-    public List<Accion> getAccionesList() {
-        return acciones; // Opcional: devuelve la lista directamente
+    // Agregar jugador al equipo
+    public void agregarJugador(Jug j) {
+        if (j != null && !jugadores.contains(j)) {
+            jugadores.add(j);
+            j.setEquipo(this); // Bidireccional
+        }
     }
 }

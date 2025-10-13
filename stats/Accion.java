@@ -125,4 +125,8 @@ public class Accion {
                 ", tanteoVisitante=" + tanteoVisitante +
                 '}';
     }
+
+    public void setTiempoGlobal(double tiempoGlobal2) {
+        this.tiempoGlobal = tiempoGlobal2;
+    }
 }

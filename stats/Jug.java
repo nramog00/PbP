@@ -24,10 +24,12 @@ public class Jug implements java.io.Serializable{
     private Integer tirosLM = 0;
 
     public Jug() {
+        this.acciones = new ArrayList<>();
     }
 
     public Jug(String nombre) {
         this.nombre = nombre;
+        this.acciones = new ArrayList<>();
         this.id = i+1;
         i++;
     }
@@ -68,8 +70,8 @@ public class Jug implements java.io.Serializable{
     public Equipo getEquipo() {
         return equipo;
     }
-    public void setEquipo(Equipo equipo) {
-        this.equipo = equipo;
+    public void setEquipo(Equipo e) {
+        this.equipo = e;
     }
     public String getNombre() {
         return nombre;
@@ -143,8 +145,7 @@ public class Jug implements java.io.Serializable{
     public void setTirosLM(Integer tirosLM) {
         this.tirosLM = tirosLM;
     }
-    public List<Accion> getAcciones() {
-        return acciones;
-    }
+    public List<Accion> getAcciones() { return new ArrayList<>(acciones); }
+    public void agregarAccion(Accion a) { if (a != null) acciones.add(a); }
 
 }
