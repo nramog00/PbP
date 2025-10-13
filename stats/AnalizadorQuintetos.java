@@ -59,7 +59,7 @@ public class AnalizadorQuintetos {
             double tiempoGlobal = a.getTiempoGlobal(); // Debe existir este campo en Accion
 
             // Cambio de cuarto
-            if (accion.contains("comienzo del cuarto")) {
+            if (accion.toLowerCase().contains("comienzo del cuarto")) {
                 cuartoActual = a.getCuarto();
                 quintetoActual.clear();
                 tiempoUltimoCambio = tiempoGlobal;
@@ -67,9 +67,9 @@ public class AnalizadorQuintetos {
             }
 
             // Sustituciones
-            if (accion.contains("sustitución")) {
-                if (accion.contains("entra a pista")) quintetoActual.add(a.getJugador().getNombre());
-                else if (accion.contains("sale de pista")) quintetoActual.remove(a.getJugador().getNombre());
+            if (accion.toLowerCase().contains("sustitución")) {
+                if (accion.toLowerCase().contains("entra a pista")) quintetoActual.add(a.getJugador().getNombre());
+                else if (accion.toLowerCase().contains("sale de pista")) quintetoActual.remove(a.getJugador().getNombre());
 
                 if (quintetoActual.size() == 5) {
                     QuintetoStats q = new QuintetoStats();
@@ -96,18 +96,18 @@ public class AnalizadorQuintetos {
             if (q.tiempoInicio == 0) q.tiempoInicio = tiempoUltimoCambio;
 
             // Estadísticas
-            if (accion.contains("tiro de 2")) { 
+            if (accion.toLowerCase().contains("tiro de 2")) { 
                 q.t2int++; 
-                if (accion.contains("anotado")) { q.t2met++; q.puntos += 2; } 
-            } else if (accion.contains("tiro de 3")) { 
+                if (accion.toLowerCase().contains("anotado")) { q.t2met++; q.puntos += 2; } 
+            } else if (accion.toLowerCase().contains("tiro de 3")) { 
                 q.t3int++; 
-                if (accion.contains("anotado")) { q.t3met++; q.puntos += 3; } 
-            } else if (accion.contains("tiro libre")) { 
+                if (accion.toLowerCase().contains("anotado")) { q.t3met++; q.puntos += 3; } 
+            } else if (accion.toLowerCase().contains("tiro libre")) { 
                 q.tlint++; 
-                if (accion.contains("anotado")) { q.tlmet++; q.puntos += 1; } 
-            } else if (accion.contains("rebote ofensivo")) q.rebOf++;
-            else if (accion.contains("rebote defensivo")) q.rebDef++;
-            else if (accion.contains("pérdida") || accion.contains("perdida")) q.perdidas++;
+                if (accion.toLowerCase().contains("anotado")) { q.tlmet++; q.puntos += 1; } 
+            } else if (accion.toLowerCase().contains("rebote ofensivo")) q.rebOf++;
+            else if (accion.toLowerCase().contains("rebote defensivo")) q.rebDef++;
+            else if (accion.toLowerCase().contains("pérdida") || accion.contains("perdida")) q.perdidas++;
 
             q.tiempoFin = tiempoGlobal;
             tiempoUltimoCambio = tiempoGlobal;
