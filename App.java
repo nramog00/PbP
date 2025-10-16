@@ -41,11 +41,90 @@ public class App {
 
         for (String line : lines) {
             // Detectar inicio de cuarto
-            if (line.contains("Comienzo del Cuarto 1")) currentQuarter = 1;
-            else if (line.contains("Comienzo del Cuarto 2")) currentQuarter = 2;
-            else if (line.contains("Comienzo del Cuarto 3")) currentQuarter = 3;
-            else if (line.contains("Comienzo del Cuarto 4")) currentQuarter = 4;
-            else if (line.contains("Comienzo de la Prórroga")) currentQuarter = 5;
+            if (line.contains("Comienzo del Cuarto 1")){
+                currentQuarter = 1; 
+                String equipo = "MIPELLETYMAS B.F. LEON";
+                String jugador = "";
+                String accion = line;
+                double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
+                rows.add(new String[]{
+                            equipo,
+                            jugador,
+                            accion,
+                            lastTime,
+                            String.valueOf(currentQuarter),
+                            toString(tiempoGlobal),
+                            String.valueOf(scoreLocal),
+                            String.valueOf(scoreVisitante)
+                    });
+            } else if (line.contains("Comienzo del Cuarto 2")) {
+                currentQuarter = 2;
+                String equipo = "MIPELLETYMAS B.F. LEON";
+                String jugador = "";
+                String accion = line;
+                double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
+                rows.add(new String[]{
+                            equipo,
+                            jugador,
+                            accion,
+                            lastTime,
+                            String.valueOf(currentQuarter),
+                            toString(tiempoGlobal),
+                            String.valueOf(scoreLocal),
+                            String.valueOf(scoreVisitante)
+                    });
+            } 
+            else if (line.contains("Comienzo del Cuarto 3")) {
+                currentQuarter = 3;
+                String equipo = "MIPELLETYMAS B.F. LEON";
+                String jugador = "";
+                String accion = line;
+                double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
+                rows.add(new String[]{
+                            equipo,
+                            jugador,
+                            accion,
+                            lastTime,
+                            String.valueOf(currentQuarter),
+                            toString(tiempoGlobal),
+                            String.valueOf(scoreLocal),
+                            String.valueOf(scoreVisitante)
+                    });
+            }
+            else if (line.contains("Comienzo del Cuarto 4")) {
+                currentQuarter = 4;
+                String equipo = "MIPELLETYMAS B.F. LEON";
+                String jugador = "";
+                String accion = line;
+                double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
+                rows.add(new String[]{
+                            equipo,
+                            jugador,
+                            accion,
+                            lastTime,
+                            String.valueOf(currentQuarter),
+                            toString(tiempoGlobal),
+                            String.valueOf(scoreLocal),
+                            String.valueOf(scoreVisitante)
+                    });
+            }
+            else if (line.contains("Comienzo de la Prórroga")) {
+                currentQuarter = 5;
+                String equipo = "MIPELLETYMAS B.F. LEON";
+                String jugador = "";
+                String accion = line;
+                double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
+                rows.add(new String[]{
+                            equipo,
+                            jugador,
+                            accion,
+                            lastTime,
+                            String.valueOf(currentQuarter),
+                            toString(tiempoGlobal),
+                            String.valueOf(scoreLocal),
+                            String.valueOf(scoreVisitante)
+                    });
+            }
 
             // Detectar marcador
             else if (line.matches("\\d+\\s*-\\s*\\d+")) {

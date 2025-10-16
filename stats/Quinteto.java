@@ -1,8 +1,6 @@
 package stats;
 
 import java.util.*;
-import java.util.List;
-import java.util.ArrayList;
 
 
 public class Quinteto {
@@ -27,6 +25,7 @@ public class Quinteto {
 
     // Getters y setters
     public int getCuarto() { return cuarto; }
+    public void setCuarto(int cuarto) { this.cuarto = cuarto; }
     public Set<Jug> getJugadores() { return jugadores; }
     public double getTiempoInicio() { return tiempoInicio; }
     public void setTiempoInicio(double t) { tiempoInicio = t; }
@@ -52,7 +51,8 @@ public class Quinteto {
         else if (accion.contains("rebote ofensivo")) rebOf++;
         else if (accion.contains("rebote defensivo")) rebDef++;
         else if (accion.contains("pérdida") || accion.contains("perdida")) perdidas++;
-
+        else if (accion.contains("comienzo del cuarto")) this.cuarto = a.getCuarto(); // Actualizar cuarto si es necesario{
+            // No sumar puntos, pero podría llevar un contador de faltas si se desea
         tiempoFin = a.getTiempoGlobal();
     }
 

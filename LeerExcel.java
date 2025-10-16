@@ -229,7 +229,7 @@ public class LeerExcel {
                 }
             }
 
-            //System.out.println("DEBUG: Lectura completada. Filas procesadas: " + filasProcesadas + ", Acciones creadas: " + accionesCreadas); // LOG RESUMEN
+            System.out.println("DEBUG: Lectura completada. Filas procesadas: " + filasProcesadas + ", Acciones creadas: " + accionesCreadas); // LOG RESUMEN
             for (Equipo e : equipos) {
                 System.out.println("DEBUG: Equipo '" + e.getNombre() + "': " + e.getAcciones().length + " acciones totales."); // LOG POR EQUIPO
             }
