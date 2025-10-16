@@ -57,10 +57,18 @@ public class AnalizadorQuintetos {
                     quintetoInicializado = true;
                 } else {
                     // Si no había quinteto previo, se limpia todo
-                    quintetoActual.clear();
-                    quintetoInicializado = false;
-                    quintetoEnCurso = null;
-                    claveActual = null;
+                    if (resultado.size() > 0) {
+                        Quinteto ultimo = new ArrayList<>(resultado.values()).get(resultado.size() - 1);
+                        quintetoActual.addAll(ultimo.getJugadores());
+                        claveActual = generarClave(quintetoActual, nuevoCuarto);
+                        resultado.putIfAbsent(claveActual, new Quinteto(nuevoCuarto, new HashSet<>(quintetoActual)));
+                        quintetoEnCurso = resultado.get(claveActual);
+                        quintetoEnCurso.setTiempoInicio(tiempoActual);
+                    } else {
+                        quintetoActual.clear();
+                        quintetoEnCurso = null;
+                        claveActual = null;
+                    }
                 }
 
                 cuartoActual = nuevoCuarto;
@@ -115,16 +123,7 @@ public class AnalizadorQuintetos {
         return resultado;
     }
 
-    /** Detecta inicios de cuarto en texto
-    private boolean esInicioCuarto(String accion) {
-        if(accion.toLowerCase().contains("comienzo del cuarto") ||
-            accion.toLowerCase().contains("inicio del cuarto") ||
-            accion.toLowerCase().contains("empieza el cuarto") ||
-            accion.toLowerCase().contains("start of quarter")) {
-            return true;
-        }
-        return false;
-    }*/
+    // Detecta inicios de cuarto en texto
     private boolean esInicioCuarto(String accion) {
         String s = accion.toLowerCase();
 

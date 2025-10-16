@@ -73,6 +73,16 @@ public class App {
                         String.valueOf(scoreLocal),
                         String.valueOf(scoreVisitante)
                 });
+                rows.add(new String[]{
+                        "ROBLES LLEIDA", // cambia esto por el nombre exacto del rival
+                        "CUARTO " + currentQuarter,
+                        "Inicio del cuarto",
+                        lastTime,
+                        String.valueOf(currentQuarter),
+                        toString((currentQuarter - 1) * DURACION_CUARTO),
+                        String.valueOf(scoreLocal),
+                        String.valueOf(scoreVisitante)
+                });
                 inicio = false;
                 ultimoCuarto = currentQuarter;
             }
@@ -228,7 +238,7 @@ public class App {
                 row.createCell(c++).setCellValue(q.getRebDef());
                 row.createCell(c++).setCellValue(q.getPerdidas());
 
-                /*Quinteto rivalQ = buscarRival(q, statsRival);
+                Quinteto rivalQ = buscarRival(q, statsRival);
                 if (rivalQ != null) {
                     Row rowRival = sheetQ.createRow(rowNum++);
                     int r = 1;
@@ -248,7 +258,7 @@ public class App {
                     rowRival.createCell(r++).setCellValue(rivalQ.getRebOf());
                     rowRival.createCell(r++).setCellValue(rivalQ.getRebDef());
                     rowRival.createCell(r++).setCellValue(rivalQ.getPerdidas());
-                }*/
+                }
             }
             try (FileOutputStream fos = new FileOutputStream(OUTPUT_XLSX_PATH)) {
                 workbook2.write(fos);
