@@ -32,13 +32,13 @@ public class AnalizadorQuintetos {
             double tiempoGlobal = obtenerTiempoEnMinutos(a);
             Jug jugador = a.getJugador();
 
-            System.out.println("DEBUG acción: [" + a.getAccion() + "]");
+            //System.out.println("DEBUG acción: [" + a.getAccion() + "]");
 
             // --- Inicio de nuevo cuarto ---
             if (esInicioCuarto(accion)) {
                 nuevoCuarto = a.getCuarto();
                 double tiempoActual = tiempoGlobal;
-                System.out.println("---- INICIO CUARTO " + nuevoCuarto + " a " + tiempoActual + " min ----");
+                //System.out.println("---- INICIO CUARTO " + nuevoCuarto + " a " + tiempoActual + " min ----");
 
                 // Cerrar el quinteto anterior si estaba activo
                 if (quintetoEnCurso != null) {
@@ -49,7 +49,7 @@ public class AnalizadorQuintetos {
                 if (quintetoActual != null && quintetoActual.size() == 5) {
                     claveActual = generarClave(quintetoActual, nuevoCuarto);
                     resultado.putIfAbsent(claveActual, new Quinteto(nuevoCuarto, new HashSet<>(quintetoActual)));
-                    System.out.println("Creando quinteto en cuarto " + cuartoActual + " -> " + claveActual);
+                    //System.out.println("Creando quinteto en cuarto " + cuartoActual + " -> " + claveActual);
                     quintetoEnCurso = resultado.get(claveActual);
                     quintetoEnCurso.setTiempoInicio(tiempoActual);
                     quintetoEnCurso.setTiempoFin(0.0);
@@ -64,7 +64,7 @@ public class AnalizadorQuintetos {
                 }
 
                 cuartoActual = nuevoCuarto;
-                System.out.println("Acción detectada en cuarto: " + a.getCuarto() + " -> " + a.getAccion());
+                //System.out.println("Acción detectada en cuarto: " + a.getCuarto() + " -> " + a.getAccion());
                 enSecuenciaSubs = false;
                 tiempoUltimoCambio = tiempoActual;
                 tiempoUltimaSub = tiempoActual;
@@ -99,9 +99,17 @@ public class AnalizadorQuintetos {
                 }
                 quintetoEnCurso.agregarAccion(a);
                 quintetoEnCurso.setTiempoFin(tiempoGlobal);
-            }
-
+            }  
+            
             tiempoUltimo = tiempoGlobal;
+
+            if (quintetoEnCurso != null && quintetoEnCurso.getTiempoInicio() == 0.0) {
+                quintetoEnCurso.setTiempoInicio(tiempoUltimo);
+            } //si no arriba
+        }
+
+        if (quintetoEnCurso != null && quintetoEnCurso.getTiempoFin() == 0.0) {
+            quintetoEnCurso.setTiempoFin(40.0); // si son 4 cuartos de 10 min
         }
 
         return resultado;
@@ -157,4 +165,32 @@ public class AnalizadorQuintetos {
         Collections.sort(lista);
         return cuarto + " - " + String.join(", ", lista);
     }
+
+    /** Calcula estadísticas del rival para cada quinteto del equipo */
+    public Map<String, Quinteto> calcularEstadisticasRival(Map<String, Quinteto> equipo, Map<String, Quinteto> rival) {
+        Map<String, Quinteto> resultado = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Quinteto> entry : equipo.entrySet()) {
+            Quinteto q = entry.getValue();
+            Quinteto rivalStats = new Quinteto(q.getCuarto(), new HashSet<>()); // sin jugadores, solo para totales
+
+            double inicio = q.getTiempoInicio();
+            double fin = q.getTiempoFin();
+
+            for (Quinteto rq : rival.values()) {
+                // si coincide el cuarto y hay solapamiento de tiempo
+                if (rq.getCuarto() == q.getCuarto() &&
+                    rq.getTiempoInicio() < fin &&
+                    rq.getTiempoFin() > inicio) {
+
+                    // acumular puntos del rival en ese tramo
+                    rivalStats.sumarStats(rq);
+                }
+            }
+            resultado.put(entry.getKey(), rivalStats);
+        }
+
+        return resultado;
+    }
+
 }

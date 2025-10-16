@@ -171,12 +171,15 @@ public class App {
 
         // === NUEVO: Analizar quintetos y añadir hoja ===
         Equipo miEquipo = lector.getEquipo("MIPELLETYMAS B.F. LEON");
-        if (miEquipo == null) {
+        Equipo rival = lector.getEquipo("ROBLES LLEIDA"); // Cambiar por el nombre real
+
+        if (miEquipo == null || rival == null) {
             System.out.println("No se encontró el equipo especificado.");
             return;
         }
         AnalizadorQuintetos analizador = new AnalizadorQuintetos();
         Map<String, Quinteto> stats = analizador.analizarQuintetos(miEquipo);
+        Map<String, Quinteto> statsRival = analizador.analizarQuintetos(rival);
 
         try (FileInputStream fis = new FileInputStream(OUTPUT_XLSX_PATH);
              Workbook workbook2 = new XSSFWorkbook(fis)) {
@@ -224,8 +227,29 @@ public class App {
                 row.createCell(c++).setCellValue(q.getRebOf());
                 row.createCell(c++).setCellValue(q.getRebDef());
                 row.createCell(c++).setCellValue(q.getPerdidas());
-            }
 
+                /*Quinteto rivalQ = buscarRival(q, statsRival);
+                if (rivalQ != null) {
+                    Row rowRival = sheetQ.createRow(rowNum++);
+                    int r = 1;
+                    rowRival.createCell(r++).setCellValue("→ Rival (" + rival.getNombre() + ")");
+                    double tiempoRival = rivalQ.getMinutosJugados();
+                    double excelTimeRival = tiempoRival / (24 * 60.0);
+                    Cell rivalTimeCell = rowRival.createCell(r++);
+                    rivalTimeCell.setCellValue(excelTimeRival);
+                    rivalTimeCell.setCellStyle(timeStyle2);
+                    rowRival.createCell(r++).setCellValue(rivalQ.getPuntos());
+                    rowRival.createCell(r++).setCellValue(rivalQ.getT2met());
+                    rowRival.createCell(r++).setCellValue(rivalQ.getT2int());
+                    rowRival.createCell(r++).setCellValue(rivalQ.getT3met());
+                    rowRival.createCell(r++).setCellValue(rivalQ.getT3int());
+                    rowRival.createCell(r++).setCellValue(rivalQ.getTlmet());
+                    rowRival.createCell(r++).setCellValue(rivalQ.getTlint());
+                    rowRival.createCell(r++).setCellValue(rivalQ.getRebOf());
+                    rowRival.createCell(r++).setCellValue(rivalQ.getRebDef());
+                    rowRival.createCell(r++).setCellValue(rivalQ.getPerdidas());
+                }*/
+            }
             try (FileOutputStream fos = new FileOutputStream(OUTPUT_XLSX_PATH)) {
                 workbook2.write(fos);
             }
@@ -260,4 +284,22 @@ public class App {
     private static String toString(double time) {
         return String.format(Locale.US, "%.2f", time);
     }
+
+    private static Quinteto buscarRival(Quinteto q, Map<String, Quinteto> rivales) {
+        for (Quinteto r : rivales.values()) {
+            if (r.getCuarto() == q.getCuarto()) {
+                double inicioQ = q.getTiempoInicio();
+                double finQ = q.getTiempoFin();
+                double inicioR = r.getTiempoInicio();
+                double finR = r.getTiempoFin();
+
+                // Si coinciden en tiempo o se solapan, consideramos que jugaban a la vez
+                if (inicioR < finQ && finR > inicioQ) {
+                    return r;
+                }
+            }
+        }
+        return null;
+    }
+
 }

@@ -47,7 +47,7 @@ public class Quinteto {
         String accion = a.getAccion().toLowerCase();
         if (accion.contains("tiro de 2")) { t2int++; if (accion.contains("anotado")) { t2met++; puntos += 2; } }
         else if (accion.contains("tiro de 3")) { t3int++; if (accion.contains("anotado")) { t3met++; puntos += 3; } }
-        else if (accion.contains("tiro libre")) { tlint++; if (accion.contains("anotado")) { tlmet++; puntos += 1; } }
+        else if (accion.contains("tiro de 1")) { tlint++; if (accion.contains("anotado")) { tlmet++; puntos += 1; } }
         else if (accion.contains("rebote ofensivo")) rebOf++;
         else if (accion.contains("rebote defensivo")) rebDef++;
         else if (accion.contains("pérdida") || accion.contains("perdida")) perdidas++;
@@ -56,7 +56,10 @@ public class Quinteto {
         tiempoFin = a.getTiempoGlobal();
     }
 
-    public double getMinutosJugados() { return tiempoFin - tiempoInicio; }
+    public double getMinutosJugados() {
+        double dur = tiempoFin - tiempoInicio;
+        return Math.max(0, dur);
+    }
 
     // Opcional: clave única basada en jugadores (ordenados) y cuarto
     public String generarClave() {
@@ -65,4 +68,15 @@ public class Quinteto {
         Collections.sort(lista);
         return cuarto + " - " + String.join(", ", lista);
     }
+
+    // Sumar estadísticas de otro quinteto (útil para rivales)
+    public void sumarStats(Quinteto otro) {
+        this.puntos += otro.puntos;
+        this.t2met += otro.t2met; this.t2int += otro.t2int;
+        this.t3met += otro.t3met; this.t3int += otro.t3int;
+        this.tlmet += otro.tlmet; this.tlint += otro.tlint;
+        this.rebOf += otro.rebOf; this.rebDef += otro.rebDef;
+        this.perdidas += otro.perdidas;
+    }
+
 }
