@@ -99,11 +99,31 @@ public class LeerExcel {
                     }
 
                     // Celda 4: Cuarto (NUMERIC)
-                    int cuarto = 1;
+                    int cuarto = 1; // Valor por defecto
                     org.apache.poi.ss.usermodel.Cell cellCuarto = fila.getCell(4);
-                    if (cellCuarto != null && cellCuarto.getCellType() == CellType.NUMERIC) {
-                        cuarto = (int) cellCuarto.getNumericCellValue();
+                    if (cellCuarto != null) {
+                        switch (cellCuarto.getCellType()) {
+                            case NUMERIC:
+                                cuarto = (int) cellCuarto.getNumericCellValue();
+                                break;
+                            case STRING:
+                                try {
+                                    String txt = cellCuarto.getStringCellValue().trim();
+                                    if (txt.matches("\\d+")) { // solo números
+                                        cuarto = Integer.parseInt(txt);
+                                    } else if (txt.toLowerCase().contains("q")) {
+                                        cuarto = Integer.parseInt(txt.replaceAll("\\D", ""));
+                                    }
+                                } catch (Exception e) {
+                                    System.err.println("No se pudo leer el cuarto en fila " + fila.getRowNum());
+                                }
+                                break;
+                            default:
+                                System.err.println("Tipo de celda inesperado en 'cuarto' fila " + fila.getRowNum());
+                                break;
+                        }
                     }
+
 
                     // Celda 7 y 8: Tanteos (NUMERIC)
                     int tanteoLocal = 0;

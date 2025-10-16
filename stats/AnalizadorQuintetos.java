@@ -1,7 +1,6 @@
 package stats;
 
 import java.util.*;
-import java.text.*;
 
 public class AnalizadorQuintetos {
 

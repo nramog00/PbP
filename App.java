@@ -4,7 +4,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import stats.AnalizadorQuintetos;
 import stats.Equipo;
 import stats.Jug;
-import stats.PruebaQuintetos;
+//import stats.PruebaQuintetos;
 import stats.Quinteto;
 
 import java.io.*;
@@ -38,96 +38,47 @@ public class App {
         int scoreLocal = 0;
         int scoreVisitante = 0;
         String lastTime = "";
+        boolean inicio = false;
+        int ultimoCuarto = 0;
 
         for (String line : lines) {
             // Detectar inicio de cuarto
-            if (line.contains("Comienzo del Cuarto 1")){
-                currentQuarter = 1; 
-                String equipo = "MIPELLETYMAS B.F. LEON";
-                String jugador = "";
-                String accion = line;
-                double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
-                rows.add(new String[]{
-                            equipo,
-                            jugador,
-                            accion,
-                            lastTime,
-                            String.valueOf(currentQuarter),
-                            toString(tiempoGlobal),
-                            String.valueOf(scoreLocal),
-                            String.valueOf(scoreVisitante)
-                    });
+            if (line.contains("Comienzo del Cuarto 1")) {
+                currentQuarter = 1;
+                inicio = true;
             } else if (line.contains("Comienzo del Cuarto 2")) {
                 currentQuarter = 2;
-                String equipo = "MIPELLETYMAS B.F. LEON";
-                String jugador = "";
-                String accion = line;
-                double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
-                rows.add(new String[]{
-                            equipo,
-                            jugador,
-                            accion,
-                            lastTime,
-                            String.valueOf(currentQuarter),
-                            toString(tiempoGlobal),
-                            String.valueOf(scoreLocal),
-                            String.valueOf(scoreVisitante)
-                    });
-            } 
-            else if (line.contains("Comienzo del Cuarto 3")) {
+                inicio = true;
+            } else if (line.contains("Comienzo del Cuarto 3")) {
                 currentQuarter = 3;
-                String equipo = "MIPELLETYMAS B.F. LEON";
-                String jugador = "";
-                String accion = line;
-                double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
-                rows.add(new String[]{
-                            equipo,
-                            jugador,
-                            accion,
-                            lastTime,
-                            String.valueOf(currentQuarter),
-                            toString(tiempoGlobal),
-                            String.valueOf(scoreLocal),
-                            String.valueOf(scoreVisitante)
-                    });
-            }
-            else if (line.contains("Comienzo del Cuarto 4")) {
+                inicio = true;
+            } else if (line.contains("Comienzo del Cuarto 4")) {
                 currentQuarter = 4;
-                String equipo = "MIPELLETYMAS B.F. LEON";
-                String jugador = "";
-                String accion = line;
-                double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
-                rows.add(new String[]{
-                            equipo,
-                            jugador,
-                            accion,
-                            lastTime,
-                            String.valueOf(currentQuarter),
-                            toString(tiempoGlobal),
-                            String.valueOf(scoreLocal),
-                            String.valueOf(scoreVisitante)
-                    });
-            }
-            else if (line.contains("Comienzo de la Prórroga")) {
+                inicio = true;
+            } else if (line.contains("Comienzo de la Prórroga")) {
                 currentQuarter = 5;
-                String equipo = "MIPELLETYMAS B.F. LEON";
-                String jugador = "";
-                String accion = line;
-                double tiempoGlobal = convertirTiempoGlobal(lastTime, currentQuarter, DURACION_CUARTO);
+                inicio = true;
+            }
+
+            if (inicio && currentQuarter != ultimoCuarto) { // Esperar al primer cuarto
+                // Insertar acción “inicio de cuarto”
+                lastTime = "10:00";
                 rows.add(new String[]{
-                            equipo,
-                            jugador,
-                            accion,
-                            lastTime,
-                            String.valueOf(currentQuarter),
-                            toString(tiempoGlobal),
-                            String.valueOf(scoreLocal),
-                            String.valueOf(scoreVisitante)
-                    });
+                        "MIPELLETYMAS B.F. LEON",
+                        "CUARTO " + currentQuarter,
+                        "Inicio del cuarto",
+                        lastTime,
+                        String.valueOf(currentQuarter),
+                        toString((currentQuarter - 1) * DURACION_CUARTO),
+                        String.valueOf(scoreLocal),
+                        String.valueOf(scoreVisitante)
+                });
+                inicio = false;
+                ultimoCuarto = currentQuarter;
             }
 
             // Detectar marcador
-            else if (line.matches("\\d+\\s*-\\s*\\d+")) {
+            if (line.matches("\\d+\\s*-\\s*\\d+")) {
                 String[] scores = line.split("-");
                 scoreLocal = Integer.parseInt(scores[0].trim());
                 scoreVisitante = Integer.parseInt(scores[1].trim());
