@@ -241,7 +241,7 @@ public class LeerExcel {
 
         // Generar PDF con tabla de jugadores (solo si hay datos)
         if (!jugadores.isEmpty()) {
-            try (PdfWriter writer = new PdfWriter("../jugadores.pdf");
+            try (PdfWriter writer = new PdfWriter("jugadores.pdf");
                  PdfDocument pdfDoc = new PdfDocument(writer);
                  Document document = new Document(pdfDoc)) {
 
@@ -285,7 +285,7 @@ public class LeerExcel {
             totalAcciones += j.getAcciones().size();
         }
         if (totalAcciones > 0) {
-            try (PdfWriter writer = new PdfWriter("../acciones.pdf");
+            try (PdfWriter writer = new PdfWriter("acciones.pdf");
                  PdfDocument pdfDoc = new PdfDocument(writer);
                  Document document = new Document(pdfDoc)) {
 

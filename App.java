@@ -163,6 +163,11 @@ public class App {
                 headerQ.createCell(i).setCellValue(columnas[i]);
             }
 
+            CreationHelper createHelper2 = workbook2.getCreationHelper();
+            CellStyle timeStyle2 = workbook2.createCellStyle();
+            timeStyle2.setDataFormat(createHelper2.createDataFormat().getFormat("mm:ss"));
+            sheetQ.setDefaultColumnStyle(3, timeStyle2);
+
             int rowNum = 1;
             for (Quinteto q : stats.values()) {
                 Row row = sheetQ.createRow(rowNum++);
@@ -174,7 +179,11 @@ public class App {
                     .sorted() // opcional, para orden alfabético
                     .collect(java.util.stream.Collectors.joining(", "))
                 );
-                row.createCell(c++).setCellValue(q.getMinutosJugados());
+                double tiempoMin2 = q.getMinutosJugados();       // minutos acumulados
+                double excelTime2 = tiempoMin2 / (24 * 60.0);       // convertir a fracción de día
+                Cell cell2 = row.createCell(c++);
+                cell2.setCellValue(excelTime2);
+                cell2.setCellStyle(timeStyle2);
                 row.createCell(c++).setCellValue(q.getPuntos());
                 row.createCell(c++).setCellValue(q.getT2met());
                 row.createCell(c++).setCellValue(q.getT2int());
