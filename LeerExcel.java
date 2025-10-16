@@ -34,7 +34,7 @@ public class LeerExcel {
              Workbook workbook = new XSSFWorkbook(fis)) {
 
             Sheet hoja = workbook.getSheetAt(0);
-            System.out.println("DEBUG: Número total de filas en la hoja: " + (hoja.getLastRowNum() + 1)); // LOG
+            //System.out.println("DEBUG: Número total de filas en la hoja: " + (hoja.getLastRowNum() + 1)); // LOG
 
             for (Row fila : hoja) {
                 // Salta la fila de headers (fila 0)
@@ -50,12 +50,12 @@ public class LeerExcel {
                     // Celda 1: Nombre del jugador (String)
                     org.apache.poi.ss.usermodel.Cell cellJugador = fila.getCell(1);
                     if (cellJugador == null || cellJugador.getCellType() != CellType.STRING) {
-                        System.out.println("WARNING: Fila " + fila.getRowNum() + ": Sin nombre de jugador válido. Skip."); // LOG
+                        //System.out.println("WARNING: Fila " + fila.getRowNum() + ": Sin nombre de jugador válido. Skip."); // LOG
                         continue;
                     }
                     String nombre = cellJugador.getStringCellValue().trim();
                     if (nombre.isEmpty()) {
-                        System.out.println("WARNING: Fila " + fila.getRowNum() + ": Nombre vacío. Skip."); // LOG
+                        //System.out.println("WARNING: Fila " + fila.getRowNum() + ": Nombre vacío. Skip."); // LOG
                         continue;
                     }
 
@@ -70,7 +70,7 @@ public class LeerExcel {
                     if (jugador == null) {
                         jugador = new Jug(nombre);
                         jugadores.add(jugador);
-                        System.out.println("DEBUG: Creado nuevo jugador: " + nombre); // LOG
+                        //System.out.println("DEBUG: Creado nuevo jugador: " + nombre); // LOG
                     }
 
                     // Celda 0: Nombre del equipo (String)
@@ -89,7 +89,7 @@ public class LeerExcel {
                     if (eqObj == null) {
                         eqObj = new Equipo(eqId++, equipoStr, equipoStr);
                         this.equipos.add(eqObj);
-                        System.out.println("DEBUG: Creado nuevo equipo: " + equipoStr); // LOG
+                        //System.out.println("DEBUG: Creado nuevo equipo: " + equipoStr); // LOG
                     }
 
                     // Asignar equipo al jugador (bidireccional)
@@ -120,7 +120,7 @@ public class LeerExcel {
                     // Celda 2: Acción (String o NUMERIC)
                     org.apache.poi.ss.usermodel.Cell acc = fila.getCell(2);
                     if (acc == null) {
-                        System.out.println("WARNING: Fila " + fila.getRowNum() + ": Sin acción. Skip."); // LOG
+                        //System.out.println("WARNING: Fila " + fila.getRowNum() + ": Sin acción. Skip."); // LOG
                         continue;
                     }
                     String accionTexto = "";
@@ -130,7 +130,7 @@ public class LeerExcel {
                         accionTexto = String.valueOf((int) acc.getNumericCellValue());
                     }
                     if (accionTexto.isEmpty()) {
-                        System.out.println("WARNING: Fila " + fila.getRowNum() + ": Acción vacía. Skip."); // LOG
+                        //System.out.println("WARNING: Fila " + fila.getRowNum() + ": Acción vacía. Skip."); // LOG
                         continue;
                     }
 
@@ -155,7 +155,7 @@ public class LeerExcel {
                                         try {
                                             time = sdf3.parse(timeStr);
                                         } catch (Exception e3) {
-                                            System.out.println("WARNING: Formato de tiempo inválido: " + timeStr); // LOG
+                                            //System.out.println("WARNING: Formato de tiempo inválido: " + timeStr); // LOG
                                             time = null;
                                         }
                                     }
@@ -168,7 +168,7 @@ public class LeerExcel {
                                 tiempoGlobal = (time.getTime() / 60000.0); // ms a minutos
                             }
                         } catch (Exception e) {
-                            System.out.println("WARNING: Error parsing tiempo en fila " + fila.getRowNum() + ": " + e.getMessage()); // LOG
+                            //System.out.println("WARNING: Error parsing tiempo en fila " + fila.getRowNum() + ": " + e.getMessage()); // LOG
                             tiempoGlobal = filasProcesadas * 0.1; // Fallback aproximado
                         }
                     }
@@ -184,7 +184,7 @@ public class LeerExcel {
                                 id = Integer.parseInt(cid.getStringCellValue().trim());
                             }
                         } catch (NumberFormatException ex) {
-                            System.out.println("WARNING: ID inválido en fila " + fila.getRowNum() + ". Usando null."); // LOG
+                            //System.out.println("WARNING: ID inválido en fila " + fila.getRowNum() + ". Usando null."); // LOG
                             id = null;
                         }
                     }
@@ -229,7 +229,7 @@ public class LeerExcel {
                 }
             }
 
-            System.out.println("DEBUG: Lectura completada. Filas procesadas: " + filasProcesadas + ", Acciones creadas: " + accionesCreadas); // LOG RESUMEN
+            //System.out.println("DEBUG: Lectura completada. Filas procesadas: " + filasProcesadas + ", Acciones creadas: " + accionesCreadas); // LOG RESUMEN
             for (Equipo e : equipos) {
                 System.out.println("DEBUG: Equipo '" + e.getNombre() + "': " + e.getAcciones().length + " acciones totales."); // LOG POR EQUIPO
             }

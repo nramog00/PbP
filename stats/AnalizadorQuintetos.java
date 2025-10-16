@@ -19,6 +19,12 @@ public class AnalizadorQuintetos {
         String claveActual = null;
         int cuartoActual = 1;
         double tiempoUltimo = 0.0;
+        boolean quintetoInicializado;
+        boolean enSecuenciaSubs = false;
+        double tiempoUltimoCambio = 0.0;
+        double tiempoUltimaSub = 0.0;
+        double tiempoGlobalBase = 0.0;
+        int nuevoCuarto = 1;
 
         for (Accion a : acciones) {
             if (a == null || a.getAccion() == null) continue;
@@ -27,21 +33,50 @@ public class AnalizadorQuintetos {
             double tiempoGlobal = obtenerTiempoEnMinutos(a);
             Jug jugador = a.getJugador();
 
+            System.out.println("DEBUG acción: [" + a.getAccion() + "]");
+
             // --- Inicio de nuevo cuarto ---
             if (esInicioCuarto(accion)) {
+                nuevoCuarto = a.getCuarto();
+                double tiempoActual = tiempoGlobal;
+                System.out.println("---- INICIO CUARTO " + nuevoCuarto + " a " + tiempoActual + " min ----");
+
+                // Cerrar el quinteto anterior si estaba activo
                 if (quintetoEnCurso != null) {
-                    quintetoEnCurso.setTiempoFin(tiempoGlobal);
+                    quintetoEnCurso.setTiempoFin(tiempoActual);
                 }
-                cuartoActual = (a.getCuarto() > 0) ? a.getCuarto() : (cuartoActual + 1);
-                quintetoActual.clear();
-                quintetoEnCurso = null;
-                claveActual = null;
-                tiempoUltimo = tiempoGlobal;
+
+                // Si había un quinteto anterior con 5 jugadores, se usa como base para el nuevo cuarto
+                if (quintetoActual != null && quintetoActual.size() == 5) {
+                    claveActual = generarClave(quintetoActual, nuevoCuarto);
+                    resultado.putIfAbsent(claveActual, new Quinteto(nuevoCuarto, new HashSet<>(quintetoActual)));
+                    System.out.println("Creando quinteto en cuarto " + cuartoActual + " -> " + claveActual);
+                    quintetoEnCurso = resultado.get(claveActual);
+                    quintetoEnCurso.setTiempoInicio(tiempoActual);
+                    quintetoEnCurso.setTiempoFin(0.0);
+                    // Marcamos como inicializado
+                    quintetoInicializado = true;
+                } else {
+                    // Si no había quinteto previo, se limpia todo
+                    quintetoActual.clear();
+                    quintetoInicializado = false;
+                    quintetoEnCurso = null;
+                    claveActual = null;
+                }
+
+                cuartoActual = nuevoCuarto;
+                System.out.println("Acción detectada en cuarto: " + a.getCuarto() + " -> " + a.getAccion());
+                enSecuenciaSubs = false;
+                tiempoUltimoCambio = tiempoActual;
+                tiempoUltimaSub = tiempoActual;
+                tiempoGlobalBase = tiempoActual;
+
                 continue;
             }
 
             // --- Sustituciones ---
             if (esSustitucion(accion)) {
+                //System.out.println("Sustitución detectada: " + accion + " a " + tiempoGlobal + " min");
                 if (accion.contains("entra")) quintetoActual.add(jugador);
                 else if (accion.contains("sale")) quintetoActual.remove(jugador);
 
@@ -73,13 +108,27 @@ public class AnalizadorQuintetos {
         return resultado;
     }
 
-    /** Detecta inicios de cuarto en texto */
+    /** Detecta inicios de cuarto en texto
     private boolean esInicioCuarto(String accion) {
-        return accion.contains("comienzo del cuarto") ||
-               accion.contains("inicio del cuarto") ||
-               accion.contains("empieza el cuarto") ||
-               accion.contains("start of quarter");
+        if(accion.toLowerCase().contains("comienzo del cuarto") ||
+            accion.toLowerCase().contains("inicio del cuarto") ||
+            accion.toLowerCase().contains("empieza el cuarto") ||
+            accion.toLowerCase().contains("start of quarter")) {
+            return true;
+        }
+        return false;
+    }*/
+    private boolean esInicioCuarto(String accion) {
+        String s = accion.toLowerCase();
+
+        // Coincidencias típicas en español e inglés
+        return s.matches(".*(inicio|comienzo|empieza|comienza).*cuarto.*")
+            || s.matches(".*(start).*quarter.*")
+            || s.matches(".*(1er|2º|3er|4º|primer|segundo|tercer|cuarto).*cuarto.*")
+            || s.matches(".*(periodo|período|period).*start.*")
+            || s.matches(".*(inicio|start).*q[1-4].*");
     }
+
 
     /** Detecta sustituciones */
     private boolean esSustitucion(String accion) {
