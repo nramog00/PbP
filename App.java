@@ -166,7 +166,7 @@ public class App {
             CreationHelper createHelper2 = workbook2.getCreationHelper();
             CellStyle timeStyle2 = workbook2.createCellStyle();
             timeStyle2.setDataFormat(createHelper2.createDataFormat().getFormat("mm:ss"));
-            sheetQ.setDefaultColumnStyle(3, timeStyle2);
+            sheetQ.setDefaultColumnStyle(2, timeStyle2);
 
             int rowNum = 1;
             for (Quinteto q : stats.values()) {
