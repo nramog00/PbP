@@ -94,6 +94,10 @@ public class AnalizadorQuintetos {
                     quintetoEnCurso = resultado.get(claveActual);
                     quintetoEnCurso.setTiempoInicio(tiempoGlobal);
                 }
+
+                if (quintetoEnCurso != null && quintetoEnCurso.getTiempoInicio() == 0.0) {
+                    quintetoEnCurso.setTiempoInicio(tiempoGlobal);
+                }
                 continue;
             }
 
@@ -114,6 +118,15 @@ public class AnalizadorQuintetos {
             if (quintetoEnCurso != null && quintetoEnCurso.getTiempoInicio() == 0.0) {
                 quintetoEnCurso.setTiempoInicio(tiempoUltimo);
             } //si no arriba
+
+            Iterator<Map.Entry<String, Quinteto>> it = resultado.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, Quinteto> e = it.next();
+                Quinteto q = e.getValue();
+                if (q.getTiempoFin() <= q.getTiempoInicio()) {
+                    it.remove(); // eliminar quintetos con 0 minutos o negativos
+                }
+            }
         }
 
         if (quintetoEnCurso != null && quintetoEnCurso.getTiempoFin() == 0.0) {
@@ -171,25 +184,44 @@ public class AnalizadorQuintetos {
 
         for (Map.Entry<String, Quinteto> entry : equipo.entrySet()) {
             Quinteto q = entry.getValue();
-            Quinteto rivalStats = new Quinteto(q.getCuarto(), new HashSet<>()); // sin jugadores, solo para totales
-
+            Quinteto rivalStats = new Quinteto(q.getCuarto(), new HashSet<>());
             double inicio = q.getTiempoInicio();
             double fin = q.getTiempoFin();
+            boolean tuvoSolape = false;
 
             for (Quinteto rq : rival.values()) {
-                // si coincide el cuarto y hay solapamiento de tiempo
-                if (rq.getCuarto() == q.getCuarto() &&
-                    rq.getTiempoInicio() < fin &&
-                    rq.getTiempoFin() > inicio) {
+                if (rq.getCuarto() != q.getCuarto()) continue;
 
-                    // acumular puntos del rival en ese tramo
-                    rivalStats.sumarStats(rq);
+                double inicioR = rq.getTiempoInicio();
+                double finR = rq.getTiempoFin();
+
+                // Calculamos el tramo de solape real
+                double inicioSolape = Math.max(inicio, inicioR);
+                double finSolape = Math.min(fin, finR);
+
+                if (finSolape > inicioSolape) {
+                    double duracionSolape = finSolape - inicioSolape;
+                    double duracionRival = finR - inicioR;
+                    double factor = duracionRival > 0 ? duracionSolape / duracionRival : 1.0;
+
+                    rivalStats.sumarStatsParcial(rq, factor);
+                    tuvoSolape = true;
                 }
             }
+
+            // Si no hubo ningún solape, igual añadimos un rival vacío
+            rivalStats.setTiempoInicio(inicio);
+            rivalStats.setTiempoFin(fin);
+            rivalStats.setMinutosJugados(fin - inicio);
+
+            if (!tuvoSolape) {
+                rivalStats.setCuarto(q.getCuarto());
+                rivalStats.setJugadores(new HashSet<>());
+            }
+
             resultado.put(entry.getKey(), rivalStats);
         }
 
         return resultado;
     }
-
 }

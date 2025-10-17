@@ -17,6 +17,7 @@ public class Quinteto {
 
     private double tiempoInicio = 0.0;
     private double tiempoFin = 0.0;
+    private String minutosJugados;
 
     public Quinteto(int cuarto, Set<Jug> jugadores) {
         this.cuarto = cuarto;
@@ -41,6 +42,7 @@ public class Quinteto {
     public int getRebOf() { return rebOf; }
     public int getRebDef() { return rebDef; }
     public int getPerdidas() { return perdidas; }
+    public String getMinutosJugadosString() { return minutosJugados; }
 
     // Método para sumar estadísticas
     public void agregarAccion(Accion a) {
@@ -79,4 +81,30 @@ public class Quinteto {
         this.perdidas += otro.perdidas;
     }
 
+    public void sumarStatsParcial(Quinteto otro, double factor) {
+        this.puntos += otro.puntos * factor;
+        this.t2met += otro.t2met * factor;
+        this.t2int += otro.t2int * factor;
+        this.t3met += otro.t3met * factor;
+        this.t3int += otro.t3int * factor;
+        this.tlmet += otro.tlmet * factor;
+        this.tlint += otro.tlint * factor;
+        this.rebOf += otro.rebOf * factor;
+        this.rebDef += otro.rebDef * factor;
+        this.perdidas += otro.perdidas * factor;
+    }
+
+    public void setMinutosJugados(double segundos) {
+        int minutos = (int) (segundos / 60);
+        int seg = (int) (segundos % 60);
+        this.minutosJugados = String.format("%02d:%02d", minutos, seg);
+    }
+
+    public void setJugadores(HashSet<Jug> hashSet) {
+        if (hashSet == null) {
+            this.jugadores = new HashSet<>();
+        } else {
+            this.jugadores = new HashSet<>(hashSet);
+        }
+    }
 }
